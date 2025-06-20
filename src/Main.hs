@@ -30,7 +30,7 @@ runWithTimeout chan micros handler = do
   env <- ask
   result <- liftIO $ timeout micros (runReaderT handler env)
   when (isNothing result) $
-    void $ restCall $ CreateMessage chan "⏱️ That took too long."
+    void $ restCall $ CreateMessage chan "That took too long."
 
 -- | Handles incoming Discord events and applies a timeout per action
 handleEvent :: [BotAction GlobalState] -> GlobalState -> Event -> DiscordHandler ()
