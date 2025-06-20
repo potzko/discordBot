@@ -10,13 +10,6 @@ extra-source-files:
 - README.md
 - CHANGELOG.md
 
-# Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
-
-# To avoid duplicated efforts in documentation and dealing with the
-# complications of embedding Haddock markup inside cabal files, it is
-# common to point users to the README.md file.
 description:         Please see the README on GitHub at <https://github.com/githubuser/discordBot#readme>
 
 dependencies:
@@ -27,6 +20,7 @@ dependencies:
   - dotenv
   - random
   - regex-tdfa
+  - transformers  # <-- added here for general/global deps if needed
 
 ghc-options:
 - -Wall
@@ -44,6 +38,7 @@ library:
   dependencies:
     - random
     - regex-tdfa
+    - transformers  # <-- added here
 
 executables:
   discordBot-exe:
@@ -55,6 +50,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - discordBot
+    - transformers      # <-- added here
 
 tests:
   discordBot-test:

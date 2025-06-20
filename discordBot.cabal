@@ -26,8 +26,10 @@ source-repository head
 library
   exposed-modules:
       Bot.Dice
+      Bot.FactorialDetector
       Bot.MathExpr
       Bot.PingPong
+      Bot.PolinomeAction
       Bot.Types
       Lib
       Main
@@ -46,14 +48,17 @@ library
     , random
     , regex-tdfa
     , text
+    , transformers
   default-language: Haskell2010
 
 executable discordBot-exe
   main-is: Main.hs
   other-modules:
       Bot.Dice
+      Bot.FactorialDetector
       Bot.MathExpr
       Bot.PingPong
+      Bot.PolinomeAction
       Bot.Types
       Lib
       Paths_discordBot
@@ -71,6 +76,7 @@ executable discordBot-exe
     , random
     , regex-tdfa
     , text
+    , transformers
   default-language: Haskell2010
 
 test-suite discordBot-test
@@ -92,4 +98,5 @@ test-suite discordBot-test
     , random
     , regex-tdfa
     , text
+    , transformers
   default-language: Haskell2010
