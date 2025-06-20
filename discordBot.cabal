@@ -27,9 +27,11 @@ library
   exposed-modules:
       Bot.Dice
       Bot.FactorialDetector
+      Bot.FibAction
       Bot.MathExpr
       Bot.PingPong
       Bot.PolinomeAction
+      Bot.RebaseAction
       Bot.Types
       Lib
       Main
@@ -56,9 +58,11 @@ executable discordBot-exe
   other-modules:
       Bot.Dice
       Bot.FactorialDetector
+      Bot.FibAction
       Bot.MathExpr
       Bot.PingPong
       Bot.PolinomeAction
+      Bot.RebaseAction
       Bot.Types
       Lib
       Paths_discordBot

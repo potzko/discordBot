@@ -22,6 +22,8 @@ import Bot.Dice (diceAction)
 import Bot.MathExpr (calcAction)
 import Bot.FactorialDetector (factorialAction)
 import Bot.PolinomeAction (polinoeAction)
+import Bot.FibAction (fibAction)
+import Bot.RebaseAction (rebaseAction)
 
 -- | Runs a DiscordHandler with a timeout.
 --   If it times out, a fallback message is sent to the specified channel.
@@ -56,6 +58,8 @@ main = do
         , calcAction
         , factorialAction
         , polinoeAction
+        , fibAction
+        , rebaseAction
         ]
   err <- runDiscord $ def
     { discordToken = T.pack token
