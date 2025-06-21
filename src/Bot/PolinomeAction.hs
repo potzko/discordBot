@@ -1,27 +1,41 @@
+{-|
+Module      : Bot.MathExpr
+Description : Implements a Discord bot command to evaluate basic arithmetic expressions
+              including bitwise, modulo, and power operations.
+              Example: "calc 1 + 2 * (3 + 4)" => 15
+              Supports: + - * / % ** ^ | & ! !& !|
+-}
+
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
+{-# OPTIONS_GHC -Wno-type-defaults #-}
 module Bot.PolinomeAction (polinoeAction) where
 
 import Discord
 import Discord.Types
 import Discord.Requests
 import Control.Monad (void, unless)
-import Control.Monad.IO.Class (liftIO)
 import qualified Data.Text as T
-import Data.Complex (Complex((:+)), cis, realPart, imagPart, magnitude)
+import Data.Complex (Complex((:+)), cis, realPart, imagPart)
 import Numeric (showFFloat)
 import Bot.Types
 
 -- | Parse "solve 2x^7 + 3x^3 - x + 1" into coefficients list
 parsePolynomial :: T.Text -> Maybe [Double]
 parsePolynomial txt =
-  let cleaned = T.replace "-" "+-" $ T.filter (/= ' ') $ T.toLower txt
+  let cleaned = T.replace "-" "+-"
+              . T.replace "\n" ""
+              . T.replace "\r" ""
+              . T.replace "\t" ""
+              . T.filter (/= ' ')
+              . T.toLower $ txt
       withoutSolve = T.stripPrefix "solve" cleaned
   in case withoutSolve of
        Nothing -> Nothing
        Just body ->
          let terms = map T.unpack . filter (not . T.null) $ T.splitOn "+" body
              coeffList = map parseTerm terms
-         in if any (== Nothing) coeffList
+         in if Nothing `elem` coeffList
               then Nothing
               else Just (collapseCoeffs (map (\(Just (c, p)) -> (c, p)) coeffList))
 
@@ -90,8 +104,14 @@ formatRoot :: Complex Double -> T.Text
 formatRoot z =
   let re = realPart z
       im = imagPart z
-      showFFloat' x = T.pack (showFFloat (Just 4) x "")
-  in "r = " <> showFFloat' re <> " + " <> showFFloat' im <> "j"
+      formatNum x =
+        let rounded = fromInteger (round x)
+        in if abs (x - fromIntegral rounded) < 1e-8
+              then T.pack (show rounded)
+              else T.pack (showFFloat (Just 4) x "")
+  in if abs im < 1e-8
+       then "r = " <> formatNum re
+       else "r = " <> formatNum re <> " + " <> formatNum im <> "j"
 
 -- Convert to factorized form
 formatFactorized :: [Complex Double] -> T.Text
@@ -106,7 +126,12 @@ displayPoly coeffs =
         | abs c < 1e-8 = ""
         | otherwise =
             let sign = if c >= 0 then " + " else " - "
-                coeffText = T.pack $ showFFloat (Just 4) (abs c) ""
+                coeffText =
+                  let absC = abs c
+                      rounded = fromInteger (round absC)
+                  in if abs (absC - fromIntegral rounded) < 1e-8
+                        then T.pack (show rounded)
+                        else T.pack $ showFFloat (Just 4) absC ""
                 power = case p of
                           0 -> ""
                           1 -> "x"
