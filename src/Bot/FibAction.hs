@@ -16,7 +16,7 @@ fib 1 = 1
 fib a
   | a < 0 && odd a  = fib (-a)
   | a < 0           = -fib (-a)
-  | odd a           = fibHalf ^ 2 + (fibHalf + fibHalfPred) ^ 2
+  | odd a           = fibHalf ^ (2 :: Integer) + (fibHalf + fibHalfPred) ^ (2 :: Integer)
   | otherwise       = fibHalf * (fibHalf + 2 * fibHalfPred)
   where
     half = div a 2

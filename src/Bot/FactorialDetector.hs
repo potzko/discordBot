@@ -11,11 +11,8 @@ import Discord
 import Discord.Types
 import Discord.Requests
 import Control.Monad (void, unless)
-import Control.Monad.IO.Class (liftIO)
 import qualified Data.Text as T
-import Data.Char (isDigit)
 import Text.Regex.TDFA ((=~))
-import Numeric (showFFloat)
 import Bot.Types
 
 -- | The passive factorial detection action.
@@ -45,7 +42,7 @@ isFactorial word = word =~ ("^[0-9]+!$" :: String)
 
 -- | Max safe value before even estimation becomes unreliable
 maxSafeEstimate :: Integer
-maxSafeEstimate = 10 ^ 18
+maxSafeEstimate = 10 ^ (18 :: Integer)
 
 -- | First estimates digit count; computes exact value only if it is small.
 --   Returns Left value if computed, Right digit count otherwise.
