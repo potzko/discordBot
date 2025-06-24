@@ -1,13 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Bot.FibAction (fibAction) where
 
-import Discord
 import Discord.Types
-import Discord.Requests
 import Control.Monad (void, unless)
 import qualified Data.Text as T
 import Text.Read (readMaybe)
 import Bot.Types
+import Bot.Util (sendMessageSafe)
 
 -- Fast doubling Fibonacci implementation with support for negative indices
 fib :: Integer -> Integer
@@ -26,16 +25,17 @@ fib a
 -- Discord command handler
 fibAction :: BotAction GlobalState
 fibAction = BotAction
-  { matchMsg = \_ msg -> "fib " `T.isPrefixOf` T.toLower msg
+  { botActionName = "FibAction"
+  , matchMsg = \_ msg -> "fib " `T.isPrefixOf` T.toLower msg
   , runAction = \event _ -> case event of
       MessageCreate msg -> unless (userIsBot (messageAuthor msg)) $ do
         let content = T.dropWhile (== ' ') $ T.drop 3 $ messageContent msg
         case readMaybe (T.unpack content) :: Maybe Integer of
-          Nothing -> void $ restCall $ CreateMessage (messageChannelId msg)
+          Nothing -> void $ sendMessageSafe "FibAction" (messageChannelId msg)
                         "Please provide a valid integer. Usage: fib 123"
           Just n -> do
             let result = fib n
-            void $ restCall $ CreateMessage (messageChannelId msg)
+            void $ sendMessageSafe "FibAction" (messageChannelId msg)
                    (T.pack $ "F(" ++ show n ++ ") = " ++ show result)
       _ -> return ()
   }

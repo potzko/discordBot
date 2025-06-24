@@ -9,15 +9,14 @@ Description : Implements a Discord bot command to evaluate and roll named and ne
 {-# OPTIONS_GHC -Wno-partial-fields #-}
 module Bot.Dice (diceAction) where
 
-import Discord
 import Discord.Types
-import Discord.Requests
 import Control.Monad (void)
 import Control.Monad.IO.Class (liftIO)
 import qualified Data.Text as T
 import Data.Char (isAlphaNum, isSpace)
 import System.Random (randomRIO)
 import Text.Regex.TDFA ((=~))
+import Bot.Util (sendMessageSafe)
 
 import Bot.Types
 
@@ -40,18 +39,19 @@ data RollResult
 --   Parses the command, evaluates the dice rolls, and sends a formatted message back.
 diceAction :: BotAction GlobalState
 diceAction = BotAction
-  { matchMsg = \_ txt -> "roll" `T.isPrefixOf` T.toLower txt
+  { botActionName = "Dice"
+  , matchMsg = \_ txt -> "roll" `T.isPrefixOf` T.toLower txt
   , runAction = \event _ -> case event of
       MessageCreate msg -> do
         let content = T.strip $ T.dropWhile (/= ' ') (messageContent msg)
         case parseExprs (T.unpack content) of
-          Nothing -> void $ restCall (CreateMessage (messageChannelId msg) "Invalid roll syntax.")
+          Nothing -> void $ sendMessageSafe "Dice" (messageChannelId msg) "Invalid roll syntax."
           Just exprs -> do
             results <- liftIO $ mapM evalExpr exprs
             let innerTotal = sum (map getTotal results)
             let output = T.unlines (formatResult <$> results)
-            void $ restCall (CreateMessage (messageChannelId msg)
-              (T.concat ["Roll: (total = ", T.pack (show innerTotal), ")\n", output]))
+            void $ sendMessageSafe "Dice" (messageChannelId msg)
+              (T.concat ["Roll: (total = ", T.pack (show innerTotal), ")\n", output])
       _ -> return ()
   }
 

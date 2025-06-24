@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Bot.Types where
+module Bot.Types (GlobalState(..), BotAction(..), MessagePredicate, MessageAction) where
 
 import Discord
 import Discord.Types
@@ -9,7 +9,8 @@ type MessagePredicate state = state -> T.Text -> Bool
 type MessageAction state = Event -> state -> DiscordHandler ()
 
 data BotAction state = BotAction
-  { matchMsg  :: MessagePredicate state
+  { botActionName :: String
+  , matchMsg  :: MessagePredicate state
   , runAction :: MessageAction state
   }
 

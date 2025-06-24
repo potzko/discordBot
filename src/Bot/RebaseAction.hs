@@ -1,13 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Bot.RebaseAction (rebaseAction) where
 
-import Discord
 import Discord.Types
-import Discord.Requests
 import Control.Monad (void, unless)
 import qualified Data.Text as T
 import Bot.Types
 import Data.List (elemIndex)
+import Bot.Util (sendMessageSafe)
 
 base64Digits :: String
 base64Digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/"
@@ -65,7 +64,8 @@ convertBase digits fromB toB = do
 -- | Discord command
 rebaseAction :: BotAction GlobalState
 rebaseAction = BotAction
-  { matchMsg = \_ msg -> "rebase" `T.isPrefixOf` T.toLower msg
+  { botActionName = "RebaseAction"
+  , matchMsg = \_ msg -> "rebase" `T.isPrefixOf` T.toLower msg
   , runAction = \event _ -> case event of
       MessageCreate msg -> unless (userIsBot (messageAuthor msg)) $ do
         let input = messageContent msg
@@ -74,15 +74,15 @@ rebaseAction = BotAction
             | validBase fromB && validBase toB ->
                 case convertBase digits fromB toB of
                   Just result ->
-                    void $ restCall $ CreateMessage (messageChannelId msg)
+                    void $ sendMessageSafe "RebaseAction" (messageChannelId msg)
                       ("`" <> T.pack digits <> "` (base " <> tshow fromB <> ") = `" <> T.pack result <> "` (base " <> tshow toB <> ")")
                   Nothing ->
-                    void $ restCall $ CreateMessage (messageChannelId msg) "Invalid digits for source base."
+                    void $ sendMessageSafe "RebaseAction" (messageChannelId msg) "Invalid digits for source base."
             | otherwise ->
-                void $ restCall $ CreateMessage (messageChannelId msg) "Base must be between 1 and 64"
+                void $ sendMessageSafe "RebaseAction" (messageChannelId msg) "Base must be between 1 and 64"
           Nothing ->
-            void $ restCall $ CreateMessage (messageChannelId msg)
-              "Usage: `rebase <number> <fromBase> <toBase>`"
+            void $ sendMessageSafe "RebaseAction" (messageChannelId msg)
+            "Usage: `rebase <number> <fromBase> <toBase>`"
       _ -> return ()
   }
 

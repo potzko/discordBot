@@ -9,25 +9,34 @@ Description : Implements a Discord bot command to evaluate basic arithmetic expr
 {-# LANGUAGE OverloadedStrings #-}
 module Bot.MathExpr (calcAction) where
 
-import Discord
 import Discord.Types
-import Discord.Requests
 import Control.Monad (void)
 import qualified Data.Text as T
 import Data.Char (isDigit, isSpace)
 import Text.Read (readMaybe)
 import Bot.Types
 import Data.Bits ((.&.), (.|.), xor, complement)
+import Bot.Util (sendMessageSafe)
 
 calcAction :: BotAction GlobalState
 calcAction = BotAction
-  { matchMsg = \_ txt -> "calc" `T.isPrefixOf` T.toLower txt
+  { botActionName = "MathExpr"
+  , matchMsg = \_ txt -> 
+      let cleaned = T.strip txt
+          -- Only match if the entire message is a valid expression
+          canParse = case evalExpr (T.unpack cleaned) of
+                      Right _ -> True
+                      Left _ -> False
+          -- Check if it contains at least one operation (not just a number)
+          hasOperation = any (`T.isInfixOf` cleaned) ["+", "-", "*", "/", "%", "**", "^", "|", "&", "!"]
+      in canParse && hasOperation
   , runAction = \event _ -> case event of
       MessageCreate msg -> do
-        let exprText = T.strip $ T.dropWhile (/= ' ') (messageContent msg)
+        let exprText = T.strip (messageContent msg)
         case evalExpr (T.unpack exprText) of
-          Left err -> void $ restCall (CreateMessage (messageChannelId msg) (T.pack err))
-          Right val -> void $ restCall (CreateMessage (messageChannelId msg) (T.pack ("Result: " ++ show val)))
+          Left _ -> return ()  -- Invalid expression, don't respond
+          Right val -> 
+            void $ sendMessageSafe "MathExpr" (messageChannelId msg) (T.pack ("Result: " ++ show val))
       _ -> return ()
   }
 

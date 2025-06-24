@@ -11,33 +11,28 @@ Description : Implements a Discord bot command to evaluate basic arithmetic expr
 {-# OPTIONS_GHC -Wno-type-defaults #-}
 module Bot.PolinomeAction (polinoeAction) where
 
-import Discord
 import Discord.Types
-import Discord.Requests
 import Control.Monad (void, unless)
 import qualified Data.Text as T
 import Data.Complex (Complex((:+)), cis, realPart, imagPart)
 import Numeric (showFFloat)
 import Bot.Types
+import Bot.Util (sendMessageSafe)
 
--- | Parse "solve 2x^7 + 3x^3 - x + 1" into coefficients list
-parsePolynomial :: T.Text -> Maybe [Double]
-parsePolynomial txt =
+-- | Parse polynomial expression into coefficients list (without "solve" prefix)
+parsePolynomialAuto :: T.Text -> Maybe [Double]
+parsePolynomialAuto txt =
   let cleaned = T.replace "-" "+-"
               . T.replace "\n" ""
               . T.replace "\r" ""
               . T.replace "\t" ""
               . T.filter (/= ' ')
               . T.toLower $ txt
-      withoutSolve = T.stripPrefix "solve" cleaned
-  in case withoutSolve of
-       Nothing -> Nothing
-       Just body ->
-         let terms = map T.unpack . filter (not . T.null) $ T.splitOn "+" body
-             coeffList = map parseTerm terms
-         in if Nothing `elem` coeffList
-              then Nothing
-              else Just (collapseCoeffs (map (\(Just (c, p)) -> (c, p)) coeffList))
+      terms = map T.unpack . filter (not . T.null) $ T.splitOn "+" cleaned
+      coeffList = map parseTerm terms
+  in if Nothing `elem` coeffList
+       then Nothing
+       else Just (collapseCoeffs (map (\(Just (c, p)) -> (c, p)) coeffList))
 
 -- | Parse each term like "2x^3", "-x", "5" into (coefficient, power)
 parseTerm :: String -> Maybe (Double, Int)
@@ -158,16 +153,24 @@ aberthSolve coeffs =
 -- Discord command handler
 polinoeAction :: BotAction GlobalState
 polinoeAction = BotAction
-  { matchMsg = \_ msg -> "solve" `T.isPrefixOf` T.toLower msg
+  { botActionName = "PolinomeAction"
+  , matchMsg = \_ msg -> 
+      let content = T.strip msg
+          canParse = case parsePolynomialAuto content of
+                      Just coeffs -> length coeffs > 1 && any (/= 0) (init coeffs)
+                      Nothing -> False
+      in canParse
   , runAction = \event _ -> case event of
       MessageCreate msg -> unless (userIsBot (messageAuthor msg)) $ do
-        let content = messageContent msg
-        case parsePolynomial content of
-          Nothing -> void $ restCall $ CreateMessage (messageChannelId msg)
-                        "Couldn't parse polynomial. Try: `solve x^3 + 2x - 1`"
-          Just coeffs -> do
-            let outputLines = aberthSolve coeffs
-            void $ restCall $ CreateMessage (messageChannelId msg)
-                   (T.intercalate "\n" outputLines)
+        let content = T.strip (messageContent msg)
+        case parsePolynomialAuto content of
+          Nothing -> return ()
+          Just coeffs -> 
+            if length coeffs > 1 && any (/= 0) (init coeffs)
+              then do
+                let outputLines = aberthSolve coeffs
+                void $ sendMessageSafe "PolinomeAction" (messageChannelId msg)
+                       (T.intercalate "\n" outputLines)
+              else return ()
       _ -> return ()
   }

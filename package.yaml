@@ -20,7 +20,9 @@ dependencies:
   - dotenv
   - random
   - regex-tdfa
-  - transformers  # <-- added here for general/global deps if needed
+  - transformers
+  - lrucache
+  - time
 
 ghc-options:
 - -Wall

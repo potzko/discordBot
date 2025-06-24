@@ -1,28 +1,29 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Bot.PingPong (pingAction, pongAction) where
 
-import Discord
 import Discord.Types
-import Discord.Requests
 import Control.Monad (void)
 import qualified Data.Text as T
+import Bot.Util (sendMessageSafe)
 
 import Bot.Types
 
 pingAction :: BotAction GlobalState
 pingAction = BotAction
-  { matchMsg = \_ txt -> "ping" `T.isPrefixOf` txt
+  { botActionName = "PingPong:Ping"
+  , matchMsg = \_ txt -> "ping" `T.isPrefixOf` txt
   , runAction = \event _ -> case event of
       MessageCreate msg ->
-        void $ restCall (CreateMessage (messageChannelId msg) "Pong!")
+        void $ sendMessageSafe "PingPong:Ping" (messageChannelId msg) "Pong!"
       _ -> return ()
   }
 
 pongAction :: BotAction GlobalState
 pongAction = BotAction
-  { matchMsg = \_ txt -> "pong" `T.isPrefixOf` txt
+  { botActionName = "PingPong:Pong"
+  , matchMsg = \_ txt -> "pong" `T.isPrefixOf` txt
   , runAction = \event _ -> case event of
       MessageCreate msg ->
-        void $ restCall (CreateMessage (messageChannelId msg) "Ping!")
+        void $ sendMessageSafe "PingPong:Pong" (messageChannelId msg) "Ping!"
       _ -> return ()
   }

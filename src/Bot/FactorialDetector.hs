@@ -7,20 +7,20 @@ Description : Detects naturally occurring factorials like "12!" in messages and 
 {-# LANGUAGE BlockArguments #-}
 module Bot.FactorialDetector (factorialAction) where
 
-import Discord
 import Discord.Types
-import Discord.Requests
 import Control.Monad (void, unless)
 import qualified Data.Text as T
 import Text.Regex.TDFA ((=~))
 import Bot.Types
+import Bot.Util (sendMessageSafe)
 
 -- | The passive factorial detection action.
 --   When a message contains a number followed by '!', the bot replies with the factorial.
 --   For large values, it estimates the number of digits.
 factorialAction :: BotAction GlobalState
 factorialAction = BotAction
-  { matchMsg = \_ msg -> any isFactorial (T.words msg)  -- Only run if message contains factorial-looking tokens
+  { botActionName = "FactorialDetector"
+  , matchMsg = \_ msg -> any isFactorial (T.words msg)  -- Only run if message contains factorial-looking tokens
   , runAction = \event _ -> case event of
       MessageCreate msg -> unless (userIsBot (messageAuthor msg)) do
         let txt = messageContent msg
@@ -32,7 +32,7 @@ factorialAction = BotAction
             let results = [(n, decideFactorial n) | n <- numbers]
             let formatted = T.unlines [formatFact n res | (n, res) <- results]
             unless (T.null formatted) do
-              void $ restCall (CreateMessage (messageChannelId msg) formatted)
+              void $ sendMessageSafe "FactorialDetector" (messageChannelId msg) formatted
       _ -> return ()
   }
 
@@ -53,7 +53,7 @@ decideFactorial n
   | otherwise = Right digitEst
   where digitEst = digitsKamenetsky n
 
--- | Uses Kamenetsky’s formula to estimate the number of digits in n!
+-- | Uses Kamenetsky's formula to estimate the number of digits in n!
 digitsKamenetsky :: Integer -> Int
 digitsKamenetsky n
   | n == 0 || n == 1 = 1
