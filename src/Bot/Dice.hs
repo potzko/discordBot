@@ -53,6 +53,7 @@ diceAction = BotAction
             void $ sendMessageSafe "Dice" (messageChannelId msg)
               (T.concat ["Roll: (total = ", T.pack (show innerTotal), ")\n", output])
       _ -> return ()
+  , actionMemBudget = Nothing
   }
 
 -- | Extract total value from a RollResult node

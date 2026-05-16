@@ -173,4 +173,5 @@ polinoeAction = BotAction
                        (T.intercalate "\n" outputLines)
               else return ()
       _ -> return ()
+  , actionMemBudget = Nothing
   }

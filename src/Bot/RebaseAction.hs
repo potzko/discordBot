@@ -84,6 +84,7 @@ rebaseAction = BotAction
             void $ sendMessageSafe "RebaseAction" (messageChannelId msg)
             "Usage: `rebase <number> <fromBase> <toBase>`"
       _ -> return ()
+  , actionMemBudget = Nothing
   }
 
 validBase :: Int -> Bool

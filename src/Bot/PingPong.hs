@@ -16,6 +16,7 @@ pingAction = BotAction
       MessageCreate msg ->
         void $ sendMessageSafe "PingPong:Ping" (messageChannelId msg) "Pong!"
       _ -> return ()
+  , actionMemBudget = Nothing
   }
 
 pongAction :: BotAction GlobalState
@@ -26,4 +27,5 @@ pongAction = BotAction
       MessageCreate msg ->
         void $ sendMessageSafe "PingPong:Pong" (messageChannelId msg) "Ping!"
       _ -> return ()
+  , actionMemBudget = Nothing
   }

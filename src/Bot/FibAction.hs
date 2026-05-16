@@ -38,4 +38,5 @@ fibAction = BotAction
             void $ sendMessageSafe "FibAction" (messageChannelId msg)
                    (T.pack $ "F(" ++ show n ++ ") = " ++ show result)
       _ -> return ()
+  , actionMemBudget = Nothing
   }

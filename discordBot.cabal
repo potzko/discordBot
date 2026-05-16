@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.37.0.
+-- This file has been generated from package.yaml by hpack version 0.38.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -25,13 +25,29 @@ source-repository head
 
 library
   exposed-modules:
+      Bot.Choose
+      Bot.Collatz
       Bot.Dice
       Bot.FactorialDetector
+      Bot.Factorization
+      Bot.Factorize
       Bot.FibAction
+      Bot.HelpAction
       Bot.MathExpr
+      Bot.NumberProperties
+      Bot.NumberProperties.Abundant
+      Bot.NumberProperties.Fibonacci
+      Bot.NumberProperties.Happy
+      Bot.NumberProperties.Internal
+      Bot.NumberProperties.Narcissistic
+      Bot.NumberProperties.Perfect
+      Bot.NumberProperties.Prime
+      Bot.NumberProperties.Triangular
+      Bot.NumberProperties.Types
+      Bot.PalindromeDetector
       Bot.PingPong
       Bot.PolinomeAction
-      Bot.PrimeDetector
+      Bot.Primality
       Bot.RebaseAction
       Bot.Types
       Bot.Util
@@ -60,13 +76,29 @@ library
 executable discordBot-exe
   main-is: Main.hs
   other-modules:
+      Bot.Choose
+      Bot.Collatz
       Bot.Dice
       Bot.FactorialDetector
+      Bot.Factorization
+      Bot.Factorize
       Bot.FibAction
+      Bot.HelpAction
       Bot.MathExpr
+      Bot.NumberProperties
+      Bot.NumberProperties.Abundant
+      Bot.NumberProperties.Fibonacci
+      Bot.NumberProperties.Happy
+      Bot.NumberProperties.Internal
+      Bot.NumberProperties.Narcissistic
+      Bot.NumberProperties.Perfect
+      Bot.NumberProperties.Prime
+      Bot.NumberProperties.Triangular
+      Bot.NumberProperties.Types
+      Bot.PalindromeDetector
       Bot.PingPong
       Bot.PolinomeAction
-      Bot.PrimeDetector
+      Bot.Primality
       Bot.RebaseAction
       Bot.Types
       Bot.Util

@@ -38,9 +38,10 @@ calcAction = BotAction
           Right val -> 
             void $ sendMessageSafe "MathExpr" (messageChannelId msg) (T.pack ("Result: " ++ show val))
       _ -> return ()
+  , actionMemBudget = Nothing
   }
 
-evalExpr :: String -> Either String Int
+evalExpr :: String -> Either String Integer
 evalExpr s = case parseExpr (filter (not . isSpace) s) of
   Just (val, []) -> Right val
   _ -> Left "Invalid expression."
@@ -57,46 +58,46 @@ evalExpr s = case parseExpr (filter (not . isSpace) s) of
 -- powExpr  ::= atom ( '**' powExpr )*
 -- atom     ::= number | '(' expr ')'
 
-bitNot :: Int -> Int
+bitNot :: Integer -> Integer
 bitNot x = complement x .&. 0xFFFFFFFF
 
-parseExpr :: String -> Maybe (Int, String)
+parseExpr :: String -> Maybe (Integer, String)
 parseExpr = parseOr
 
-parseOr :: String -> Maybe (Int, String)
+parseOr :: String -> Maybe (Integer, String)
 parseOr = chainl1 parseXor orOp
   where orOp ('|':rest) = Just ((.|.), rest)
         orOp ('!':'|':rest) = Just ((\a b -> bitNot (a .|. b)), rest)
         orOp _ = Nothing
 
-parseXor :: String -> Maybe (Int, String)
+parseXor :: String -> Maybe (Integer, String)
 parseXor = chainl1 parseAnd xorOp
   where xorOp ('^':rest) = Just (xor, rest)
         xorOp _ = Nothing
 
-parseAnd :: String -> Maybe (Int, String)
+parseAnd :: String -> Maybe (Integer, String)
 parseAnd = chainl1 parseNand andOp
   where andOp ('&':rest) = Just ((.&.), rest)
         andOp _ = Nothing
 
-parseNand :: String -> Maybe (Int, String)
+parseNand :: String -> Maybe (Integer, String)
 parseNand = chainl1 parseNot nandOp
   where nandOp ('!':'&':rest) = Just ((\a b -> bitNot (a .&. b)), rest)
         nandOp _ = Nothing
 
-parseNot :: [Char] -> Maybe (Int, String)
+parseNot :: [Char] -> Maybe (Integer, String)
 parseNot ('!':rest) = do
   (v, rest') <- parseNot rest
   return (bitNot v, rest')
 parseNot s = parseAdd s
 
-parseAdd :: String -> Maybe (Int, String)
+parseAdd :: String -> Maybe (Integer, String)
 parseAdd = chainl1 parseMul addOp
   where addOp ('+':rest) = Just ((+), rest)
         addOp ('-':rest) = Just ((-), rest)
         addOp _ = Nothing
 
-parseMul :: String -> Maybe (Int, String)
+parseMul :: String -> Maybe (Integer, String)
 parseMul = chainl1 parsePow mulOp
   where mulOp ('*':'*': _rest) = Nothing  -- exclude power here
         mulOp ('*':rest) = Just ((*), rest)
@@ -104,12 +105,12 @@ parseMul = chainl1 parsePow mulOp
         mulOp ('%':rest) = Just (mod, rest)
         mulOp _ = Nothing
 
-parsePow :: String -> Maybe (Int, String)
+parsePow :: String -> Maybe (Integer, String)
 parsePow = chainr1 parseAtom powOp
   where powOp ('*':'*':rest) = Just ((^), rest)
         powOp _ = Nothing
 
-parseAtom :: String -> Maybe (Int, String)
+parseAtom :: String -> Maybe (Integer, String)
 parseAtom ('-':rest) = do
   (v, rest') <- parseAtom rest
   return (-v, rest')
@@ -127,7 +128,7 @@ parseAtom s =
     Nothing -> Nothing
 
 -- Helper: chained left-associative parser
-chainl1 :: (String -> Maybe (Int, String)) -> (String -> Maybe (Int -> Int -> Int, String)) -> String -> Maybe (Int, String)
+chainl1 :: (String -> Maybe (Integer, String)) -> (String -> Maybe (Integer -> Integer -> Integer, String)) -> String -> Maybe (Integer, String)
 chainl1 p op s = do
   (x, rest) <- p s
   chain x rest
@@ -139,7 +140,7 @@ chainl1 p op s = do
       Nothing -> Just (acc, rest)
 
 -- Helper: chained right-associative parser
-chainr1 :: (String -> Maybe (Int, String)) -> (String -> Maybe (Int -> Int -> Int, String)) -> String -> Maybe (Int, String)
+chainr1 :: (String -> Maybe (Integer, String)) -> (String -> Maybe (Integer -> Integer -> Integer, String)) -> String -> Maybe (Integer, String)
 chainr1 p op s = do
   (x, rest) <- p s
   case op rest of

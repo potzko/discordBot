@@ -50,6 +50,9 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    # Process-wide heap cap: pass at runtime instead of baking it in here,
+    # because cabal's ghc-options field whitespace-splits and won't carry
+    # `-with-rtsopts="-N -M1G"` through as one token. See run.sh.
     dependencies:
     - discordBot
     - transformers      # <-- added here

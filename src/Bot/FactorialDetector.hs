@@ -34,6 +34,7 @@ factorialAction = BotAction
             unless (T.null formatted) do
               void $ sendMessageSafe "FactorialDetector" (messageChannelId msg) formatted
       _ -> return ()
+  , actionMemBudget = Nothing
   }
 
 -- | Checks if a word looks like a factorial (e.g., "5!")
